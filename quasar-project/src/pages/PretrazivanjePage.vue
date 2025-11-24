@@ -51,6 +51,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const rows = ref([])
 const filteredBooks = ref([])
@@ -94,20 +95,14 @@ const columns = [
 ]
 
 async function loadBooks() {
-  try {
-    const response = await fetch('http://localhost:3000/api/knjiga')
-
-    if (!response.ok) {
-      throw new Error('Greška u mrežnom zahtjevu')
-    }
-
-    const data = await response.json()
-    rows.value = data
-    filteredBooks.value = [...rows.value]
-
-  } catch (error) {
-    console.error('Greška pri dohvaćanju knjiga:', error)
-  }
+  await axios.get('http://localhost:3000/api/knjiga')
+    .then(result => {
+      rows.value = result.data
+      filteredBooks.value = [...rows.value]
+    })
+    .catch(error => {
+      console.error('Greška pri dohvaćanju knjiga:', error)
+    })
 }
 
 function searchBooks() {

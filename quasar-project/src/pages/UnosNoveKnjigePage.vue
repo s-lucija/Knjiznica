@@ -1,15 +1,13 @@
 <template>
   <q-page padding class="bg-grey-1">
+
     <h4 class="text-h5 text-primary text-center q-mb-md">
       Unos nove knjige
     </h4>
 
     <div class="q-pa-md q-gutter-md" style="max-width: 600px; margin: 0 auto;">
-      <q-card 
-        flat 
-        bordered 
-        class="q-pa-md"
-      >
+      <q-card flat bordered class="q-pa-md">
+
         <q-input 
           filled 
           v-model="id" 
@@ -40,12 +38,17 @@
           class="q-mb-md"
         />
 
-        <q-file 
-          filled 
-          v-model="slika" 
-          label="Odaberi sliku" 
-          accept="image/*" 
-          :multiple="false" 
+        <q-input
+          filled
+          v-model="slika"
+          label="URL slike"
+          class="q-mb-md"
+        />
+
+        <q-input
+          filled
+          v-model="stanje"
+          label="Stanje knjige"
           class="q-mb-md"
         />
 
@@ -63,7 +66,7 @@
             color="primary" 
             icon="save" 
             unelevated 
-            @click="spremiKnjigu"
+            @click="insertBook"
           />
           <q-btn 
             label="Odustani" 
@@ -73,6 +76,7 @@
             @click="odustani"
           />
         </div>
+
       </q-card>
     </div>
 
@@ -90,7 +94,7 @@
         >
           <q-img 
             v-if="k.slika" 
-            :src="getSlika(k.slika)" 
+            :src="k.slika" 
             alt="Slika knjige" 
             class="book-cover"
           />
@@ -98,7 +102,9 @@
           <q-card-section>
             <div class="text-h6">{{ k.naslov }}</div>
             <div class="text-subtitle2">Autor: {{ k.autor }}</div>
-            <div class="text-caption text-grey q-mt-xs">{{ k.status }}</div>
+            <div class="text-caption text-grey q-mt-xs">
+              Stanje: {{ k.stanje }} | Status: {{ k.status }}
+            </div>
           </q-card-section>
 
           <q-separator inset />
@@ -115,40 +121,42 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
 const knjige = ref([])
 const id = ref(1)
 const naslov = ref('')
 const autor = ref('')
 const opis = ref('')
-const slika = ref(null)
+const slika = ref('')
+const stanje = ref('')
 const status = ref('Slobodna')
 
-async function spremiKnjigu() {
-  const formData = new FormData()
-  formData.append('naslov', naslov.value)
-  formData.append('autor', autor.value)
-  formData.append('opis', opis.value)
-  formData.append('status', status.value)
-  if (slika.value) {
-    const file = Array.isArray(slika.value) ? slika.value[0] : slika.value
-    formData.append('slika', file)
+async function insertBook() {
+  const formData = {
+    naslov: naslov.value,
+    autor: autor.value,
+    opis: opis.value,
+    slika: slika.value,
+    stanje: stanje.value,
+    status: status.value
   }
 
+  console.log("Test:", formData.autor)
+
   try {
-    const response = await fetch('http://localhost:3000/api/knjiga', {
-      method: 'POST',
-      body: formData
-    })
+    const result = await axios.post(
+      'http://localhost:3000/api/unos_knjige',
+      formData
+    )
 
-    if (!response.ok) throw new Error('Greška pri dodavanju knjige')
-
-    const data = await response.json()
-    knjige.value.push(data)
+    console.log("Server response:", result.data)
+    knjige.value.push(result.data)
     id.value++
     odustani()
+
   } catch (error) {
-    console.error(error)
+    console.error("Greška pri dodavanju knjige:", error)
   }
 }
 
@@ -156,14 +164,9 @@ function odustani() {
   naslov.value = ''
   autor.value = ''
   opis.value = ''
-  slika.value = null
+  slika.value = ''
+  stanje.value = ''
   status.value = 'Slobodna'
-}
-
-function getSlika(file) {
-  if (!file) return ''
-  if (Array.isArray(file)) file = file[0]
-  return typeof file === 'string' ? file : URL.createObjectURL(file)
 }
 </script>
 

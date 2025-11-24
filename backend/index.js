@@ -49,7 +49,20 @@ app.get("/api/knjiga/autor/:autor", (req, res) => {
     "SELECT * FROM knjiga WHERE autor = ?",
     [req.params.autor],
     (err, result) => {
-      if (err) return res.status(500).njson(err);
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+});
+
+app.post("/api/unos_knjige", (req, res) => {
+  const data = req.body;
+  const knjiga = [[data.naslov, data.autor, data.opis, data.slika, data.stanje, data.status]];
+  db.query(
+    "INSERT INTO knjiga (naslov, autor, opis, slika, stanje, status) VALUES ?",
+    [knjiga],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
       res.json(result);
     }
   );

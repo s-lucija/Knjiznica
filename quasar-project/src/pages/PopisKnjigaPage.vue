@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-pa-lg bg-grey-1">
-
     <h4 class="text-h5 text-primary text-center q-mb-md">
       Popis svih knjiga
     </h4>
@@ -17,7 +16,6 @@
       class="bg-white shadow-2 rounded-borders"
       wrap-cells
     >
-
       <template v-slot:body-cell-slika="props">
         <q-td :props="props">
           <img
@@ -39,14 +37,13 @@
           </q-chip>
         </q-td>
       </template>
-
     </q-table>
-
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const rows = ref([])
 
@@ -66,7 +63,12 @@ const columns = [
     field: 'naslov',
     align: 'left',
     sortable: true,
-    style: { width: '180px', fontSize: '14px', whiteSpace: 'normal', wordBreak: 'break-word' },
+    style: {
+      width: '180px',
+      fontSize: '14px',
+      whiteSpace: 'normal',
+      wordBreak: 'break-word'
+    },
     headerStyle: { fontSize: '16px' }
   },
   {
@@ -75,7 +77,12 @@ const columns = [
     field: 'autor',
     align: 'left',
     sortable: true,
-    style: { width: '140px', fontSize: '14px', whiteSpace: 'normal', wordBreak: 'break-word' },
+    style: {
+      width: '140px',
+      fontSize: '14px',
+      whiteSpace: 'normal',
+      wordBreak: 'break-word'
+    },
     headerStyle: { fontSize: '16px' }
   },
   {
@@ -83,7 +90,12 @@ const columns = [
     label: 'Opis',
     field: 'opis',
     align: 'left',
-    style: { width: '300px', fontSize: '14px', whiteSpace: 'normal', wordBreak: 'break-word' },
+    style: {
+      width: '300px',
+      fontSize: '14px',
+      whiteSpace: 'normal',
+      wordBreak: 'break-word'
+    },
     headerStyle: { fontSize: '16px' }
   },
   {
@@ -104,21 +116,18 @@ const columns = [
   }
 ]
 
-onMounted(async () => {
-  try {
-    const response = await fetch('http://localhost:3000/api/knjiga')
-
-    if (!response.ok) {
-      throw new Error('Greška u mrežnom zahtjevu')
-    }
-
-    const data = await response.json()
-    rows.value = data
-
-  } catch (error) {
-    console.error('Greška pri dohvaćanju knjiga:', error)
-  }
+onMounted(() => {
+  loadBooks()
 })
+
+async function loadBooks() {
+  try {
+    const result = await axios.get('http://localhost:3000/api/knjiga')
+    rows.value = result.data
+  } catch (error) {
+    console.error(error)
+  }
+}
 </script>
 
 <style scoped>
